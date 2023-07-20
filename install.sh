@@ -1,3 +1,7 @@
+# On the PostgreSQL machine:
+# sudo su - postgres -c "createuser -S -P awx"
+# sudo su - postgres -c "createdb -O awx awx"
+
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
 sudo firewall-cmd --add-service=http --permanent     # Nginx server
