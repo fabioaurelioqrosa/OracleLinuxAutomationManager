@@ -25,10 +25,6 @@ read DATABASE_PASSWORD
 echo "Admin e-mail: "
 read ADMIN_EMAIL
 
-echo "Admin password: "
-read ADMIN_PASSWORD
-
-
 
 
 ## Set firewall rules
@@ -86,19 +82,13 @@ sudo sh -c "sed -n '1,36p' /etc/nginx/nginx.conf.bak > /etc/nginx/nginx.conf"
 sudo sh -c 'echo "}" >> /etc/nginx/nginx.conf' 
 
 
-
-## Run the following commands on all hosts
-#sudo su -l awx -s /bin/bash
-
-
-
 podman system migrate
 podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest
 
 awx-manage migrate
 awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
-$ADMIN_PASSWORD
-$ADMIN_PASSWORD
+admin
+admin
 EOF
 
 awx-manage provision_instance --hostname=$HOSTNAME --node_type=hybrid
