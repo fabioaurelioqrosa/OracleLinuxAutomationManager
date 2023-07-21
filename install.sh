@@ -14,6 +14,19 @@ read DATABASE_USER
 echo "Database Password: "
 read DATABASE_PASSWORD
 
+echo "Admin e-mail: "
+read ADMIN_EMAIL
+
+echo "Admin password: "
+read ADMIN_PASSWORD
+
+#sudo useradd awx
+#sudo passwd awx > /dev/null << EOF
+#$AWX_PASSWORD
+#$AWX_PASSWORD
+#EOF
+#sudo usermod -aG wheel awx
+
 
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
@@ -72,22 +85,25 @@ sudo sh -c 'echo "}" >> /etc/nginx/nginx.conf'
 
 
 ## Run the following commands on all hosts
-sudo su -l awx -s /bin/bash
+#sudo su -l awx -s /bin/bash
 
-ADMIN_EMAIL=admin@awx.com # Administrator's e-mail
+
 
 podman system migrate
 podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest
 
 awx-manage migrate
-awx-manage createsuperuser --username admin --email $ADMIN_EMAIL
+awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
+$ADMIN_PASSWORD
+$ADMIN_PASSWORD
+EOF
 
 awx-manage provision_instance --hostname=$HOSTNAME --node_type=hybrid
 awx-manage register_default_execution_environments
 awx-manage register_queue --queuename=default --hostnames=$HOSTNAME
 awx-manage register_queue --queuename=controlplane --hostnames=$HOSTNAME
 
-exit
+#exit
 
 ## Configure the Receptor
 sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
