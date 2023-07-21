@@ -1,3 +1,20 @@
+# On the PostgreSQL machine:
+# sudo su - postgres -c "createuser -S -P awx"
+# sudo su - postgres -c "createdb -O awx awx"
+
+echo "Database Host: "
+read DATABASE_HOST
+
+echo "Database Port: "
+read DATABASE_PORT
+
+echo "Database User: "
+read DATABASE_USER
+
+echo "Database Password: "
+read DATABASE_PASSWORD
+
+
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
 sudo firewall-cmd --add-service=http --permanent     # Nginx server
@@ -31,9 +48,10 @@ sudo sh -c 'echo "unixsocketperm 775" >> /etc/redis.conf'
 
 ## Edit the /etc/tower/settings.py file and configure the CLUSTER_HOST_ID field:
 sudo sed -i "s/CLUSTER_HOST_ID = \"awx\"/CLUSTER_HOST_ID = \"$HOSTNAME\"/" "/etc/tower/settings.py"
-sudo sed -i "s/'PASSWORD': os.getenv(\"DATABASE_PASSWORD\", None),/'PASSWORD': 'awx',/" "/etc/tower/settings.py"
-sudo sed -i "s/'HOST': os.getenv(\"DATABASE_HOST\", None),/'HOST': '$HOSTNAME',/" "/etc/tower/settings.py"
-sudo sed -i "s/'PORT': os.getenv(\"DATABASE_PORT\", None),/'PORT': 5432,/" "/etc/tower/settings.py"
+sudo sed -i "s/'USER': os.getenv(\"DATABASE_USER\", None),/'USER': '$DATABASE_USER',/" "/etc/tower/settings.py"
+sudo sed -i "s/'PASSWORD': os.getenv(\"DATABASE_PASSWORD\", None),/'PASSWORD': '$DATABASE_PASSWORD',/" "/etc/tower/settings.py"
+sudo sed -i "s/'HOST': os.getenv(\"DATABASE_HOST\", None),/'HOST': '$DATABASE_HOST',/" "/etc/tower/settings.py"
+sudo sed -i "s/'PORT': os.getenv(\"DATABASE_PORT\", None),/'PORT': $DATABASE_PORT,/" "/etc/tower/settings.py"
 
 ## On all hosts, generate SSL certificates for NGINX:
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/tower/tower.key -out /etc/tower/tower.crt > /dev/null << EOF
@@ -56,10 +74,7 @@ sudo sh -c 'echo "}" >> /etc/nginx/nginx.conf'
 ## Run the following commands on all hosts
 sudo su -l awx -s /bin/bash
 
-#DATABASE_PASSWORD=awx                # User password
-#DATABASE_HOST=postgresql             # Postgresql server hostname
-#DATABASE_PORT=5432                   # Postgresql server port
-ADMIN_EMAIL=quintellarosa@gmail.com  # Administrator's e-mail
+ADMIN_EMAIL=admin@awx.com # Administrator's e-mail
 
 podman system migrate
 podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest
@@ -89,6 +104,6 @@ sudo systemctl enable --now ol-automation-manager.service
 # Demo Inventory
 # Demo Job template
 # And so on
-sudo su -l awx -s /bin/bash
-awx-manage create_preload_data
-exit
+#sudo su -l awx -s /bin/bash
+#awx-manage create_preload_data
+#exit
