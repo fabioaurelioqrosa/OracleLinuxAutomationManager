@@ -1,26 +1,3 @@
-adduser user
-passwd user > /dev/null << EOF
-123Mudar
-123Mudar
-EOF
-usermod -aG wheel user
-
-## Install PostgreSQL
-cd ~
-git clone https://github.com/fabioaurelioqrosa/PostgreSQL.git
-cd PostgreSQL
-sudo ./install.sh
-cd ~
-sudo su - postgres -c "createuser -S -P awx" > /dev/null << EOF
-awx
-awx
-EOF
-
-sudo su - postgres -c "createdb -O awx awx"
-
-sudo systemctl restart postgresql
-
-
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
 sudo firewall-cmd --add-service=http --permanent     # Nginx server
