@@ -2,6 +2,14 @@
 # sudo su - postgres -c "createuser -S -P awx"
 # sudo su - postgres -c "createdb -O awx awx"
 
+
+#sudo useradd awx
+#sudo passwd awx > /dev/null << EOF
+#$AWX_PASSWORD
+#$AWX_PASSWORD
+#EOF
+#sudo usermod -aG wheel awx
+
 echo "Database Host: "
 read DATABASE_HOST
 
@@ -20,12 +28,7 @@ read ADMIN_EMAIL
 echo "Admin password: "
 read ADMIN_PASSWORD
 
-#sudo useradd awx
-#sudo passwd awx > /dev/null << EOF
-#$AWX_PASSWORD
-#$AWX_PASSWORD
-#EOF
-#sudo usermod -aG wheel awx
+
 
 
 ## Set firewall rules
