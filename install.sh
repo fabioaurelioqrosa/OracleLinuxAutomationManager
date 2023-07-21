@@ -1,3 +1,26 @@
+adduser user
+passwd user > /dev/null << EOF
+123Mudar
+123Mudar
+EOF
+usermod -aG wheel user
+
+## Install PostgreSQL
+cd ~
+git clone https://github.com/fabioaurelioqrosa/PostgreSQL.git
+cd PostgreSQL
+sudo ./install.sh
+cd ~
+sudo su - postgres -c "createuser -S -P awx" > /dev/null << EOF
+awx
+awx
+EOF
+
+sudo su - postgres -c "createdb -O awx awx"
+
+sudo systemctl restart postgresql
+
+
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
 sudo firewall-cmd --add-service=http --permanent     # Nginx server
@@ -31,9 +54,20 @@ sudo sh -c 'echo "unixsocketperm 775" >> /etc/redis.conf'
 
 ## Edit the /etc/tower/settings.py file and configure the CLUSTER_HOST_ID field:
 sudo sed -i "s/CLUSTER_HOST_ID = \"awx\"/CLUSTER_HOST_ID = \"$HOSTNAME\"/" "/etc/tower/settings.py"
+sudo sed -i "s/'PASSWORD': os.getenv(\"DATABASE_PASSWORD\", None),/'PASSWORD': 'awx',/" "/etc/tower/settings.py"
+sudo sed -i "s/'HOST': os.getenv(\"DATABASE_HOST\", None),/'HOST': '$HOSTNAME',/" "/etc/tower/settings.py"
+sudo sed -i "s/'PORT': os.getenv(\"DATABASE_PORT\", None),/'PORT': 5432,/" "/etc/tower/settings.py"
 
 ## On all hosts, generate SSL certificates for NGINX:
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/tower/tower.key -out /etc/tower/tower.crt
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/tower/tower.key -out /etc/tower/tower.crt > /dev/null << EOF
+BR
+SP
+
+
+
+$HOSTNAME
+
+EOF
 
 ## Remove any default configuration for NGINX.
 sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
