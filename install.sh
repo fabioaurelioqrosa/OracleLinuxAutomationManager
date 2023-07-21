@@ -2,8 +2,8 @@
 # sudo su - postgres -c "createuser -S -P awx"
 # sudo su - postgres -c "createdb -O awx awx"
 
-
 #sudo useradd awx
+#AWX_PASSWORD=Senha#01
 #sudo passwd awx > /dev/null << EOF
 #$AWX_PASSWORD
 #$AWX_PASSWORD
