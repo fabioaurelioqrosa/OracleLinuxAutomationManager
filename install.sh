@@ -2,13 +2,23 @@
 # sudo su - postgres -c "createuser -S -P awx"
 # sudo su - postgres -c "createdb -O awx awx"
 
-#sudo useradd awx
-#AWX_PASSWORD=Senha#01
-#sudo passwd awx > /dev/null << EOF
-#$AWX_PASSWORD
-#$AWX_PASSWORD
-#EOF
-#sudo usermod -aG wheel awx
+echo "AWX user password: "
+read AWX_PASSWORD
+
+sudo useradd awx
+sudo passwd awx > /dev/null << EOF
+$AWX_PASSWORD
+$AWX_PASSWORD
+EOF
+sudo usermod -aG wheel awx
+
+sudo su - awx
+
+echo "AWX admin password: "
+read ADMIN_PASSWORD
+
+echo "Admin e-mail: "
+read ADMIN_EMAIL
 
 echo "Database Host: "
 read DATABASE_HOST
@@ -22,8 +32,7 @@ read DATABASE_USER
 echo "Database Password: "
 read DATABASE_PASSWORD
 
-echo "Admin e-mail: "
-read ADMIN_EMAIL
+
 
 
 
@@ -86,17 +95,11 @@ podman system migrate
 podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest
 
 awx-manage migrate
-awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
-admin
-admin
-EOF
 
 awx-manage provision_instance --hostname=$HOSTNAME --node_type=hybrid
 awx-manage register_default_execution_environments
 awx-manage register_queue --queuename=default --hostnames=$HOSTNAME
 awx-manage register_queue --queuename=controlplane --hostnames=$HOSTNAME
-
-#exit
 
 ## Configure the Receptor
 sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
@@ -104,15 +107,7 @@ sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
 ## Start the service
 sudo systemctl enable --now ol-automation-manager.service
 
-
-## OPTIONAL
-## Run the following command to preload data, such as:
-# Demo Project
-# Default Galaxy Credentials
-# Demo Organization
-# Demo Inventory
-# Demo Job template
-# And so on
-#sudo su -l awx -s /bin/bash
-#awx-manage create_preload_data
-#exit
+awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
+$ADMIN_PASSWORD
+$ADMIN_PASSWORD
+EOF
