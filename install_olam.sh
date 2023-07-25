@@ -1,3 +1,6 @@
+echo "AWX user password: "
+read AWX_PASSWORD
+
 echo "AWX admin password: "
 read ADMIN_PASSWORD
 
@@ -17,8 +20,13 @@ echo "Database Password: "
 read DATABASE_PASSWORD
 
 
-
-
+## Create the awx user
+sudo useradd awx
+sudo passwd awx > /dev/null << EOF
+$AWX_PASSWORD
+$AWX_PASSWORD
+EOF
+sudo usermod -aG wheel awx
 
 ## Set firewall rules
 sudo firewall-cmd --add-port=27199/tcp --permanent   # Port 27199 provides a TCP listener port for the Oracle Linux Automation Manager service mesh and must be open on each node in the mesh.
