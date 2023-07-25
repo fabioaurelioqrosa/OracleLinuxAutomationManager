@@ -75,15 +75,15 @@ sudo sh -c "sed -n '1,36p' /etc/nginx/nginx.conf.bak > /etc/nginx/nginx.conf"
 sudo sh -c 'echo "}" >> /etc/nginx/nginx.conf' 
 
 
-podman system migrate
-podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest
+sudo su - awx -c "podman system migrate"
+sudo su - awx -c "podman pull container-registry.oracle.com/oracle_linux_automation_manager/olam-ee:latest"
 
-awx-manage migrate
+sudo su - awx -c "awx-manage migrate"
 
-awx-manage provision_instance --hostname=$HOSTNAME --node_type=hybrid
-awx-manage register_default_execution_environments
-awx-manage register_queue --queuename=default --hostnames=$HOSTNAME
-awx-manage register_queue --queuename=controlplane --hostnames=$HOSTNAME
+sudo su - awx -c "awx-manage provision_instance --hostname=$HOSTNAME --node_type=hybrid"
+sudo su - awx -c "awx-manage register_default_execution_environments"
+sudo su - awx -c "awx-manage register_queue --queuename=default --hostnames=$HOSTNAME"
+sudo su - awx -c "awx-manage register_queue --queuename=controlplane --hostnames=$HOSTNAME"
 
 ## Configure the Receptor
 sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
@@ -91,7 +91,7 @@ sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
 ## Start the service
 sudo systemctl enable --now ol-automation-manager.service
 
-awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
+sudo su - awx -c "awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
 $ADMIN_PASSWORD
 $ADMIN_PASSWORD
-EOF
+EOF"
