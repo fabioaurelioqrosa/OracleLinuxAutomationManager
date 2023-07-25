@@ -1,0 +1,3 @@
+# On the PostgreSQL machine:
+# sudo su - postgres -c "createuser -S -P awx"
+# sudo su - postgres -c "createdb -O awx awx"

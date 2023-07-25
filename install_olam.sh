@@ -1,19 +1,3 @@
-# On the PostgreSQL machine:
-# sudo su - postgres -c "createuser -S -P awx"
-# sudo su - postgres -c "createdb -O awx awx"
-
-echo "AWX user password: "
-read AWX_PASSWORD
-
-sudo useradd awx
-sudo passwd awx > /dev/null << EOF
-$AWX_PASSWORD
-$AWX_PASSWORD
-EOF
-sudo usermod -aG wheel awx
-
-sudo su - awx
-
 echo "AWX admin password: "
 read ADMIN_PASSWORD
 
