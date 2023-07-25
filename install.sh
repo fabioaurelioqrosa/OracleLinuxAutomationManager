@@ -1,30 +1,24 @@
-echo "AWX user password: "
-read AWX_PASSWORD
-
-echo "AWX admin password: "
-read ADMIN_PASSWORD
+echo "AWX password: "
+read PASSWORD
 
 echo "Admin e-mail: "
-read ADMIN_EMAIL
+read EMAIL
 
-echo "Database Host: "
-read DATABASE_HOST
+## Install PostgreSQL
+git clone https://github.com/fabioaurelioqrosa/PostgreSQL.git
+cd PostgreSQL
+./install.sh
+cd ..
 
-echo "Database Port: "
-read DATABASE_PORT
-
-echo "Database User: "
-read DATABASE_USER
-
-echo "Database Password: "
-read DATABASE_PASSWORD
-
+## Create PostgreSQL role and database "awx"
+sudo su - postgres -c "createuser -S -P awx"
+sudo su - postgres -c "createdb -O awx awx"
 
 ## Create the awx user
 sudo useradd awx
 sudo passwd awx > /dev/null << EOF
-$AWX_PASSWORD
-$AWX_PASSWORD
+$PASSWORD
+$PASSWORD
 EOF
 sudo usermod -aG wheel awx
 
@@ -61,10 +55,10 @@ sudo sh -c 'echo "unixsocketperm 775" >> /etc/redis.conf'
 
 ## Edit the /etc/tower/settings.py file and configure the CLUSTER_HOST_ID field:
 sudo sed -i "s/CLUSTER_HOST_ID = \"awx\"/CLUSTER_HOST_ID = \"$HOSTNAME\"/" "/etc/tower/settings.py"
-sudo sed -i "s/'USER': os.getenv(\"DATABASE_USER\", None),/'USER': '$DATABASE_USER',/" "/etc/tower/settings.py"
-sudo sed -i "s/'PASSWORD': os.getenv(\"DATABASE_PASSWORD\", None),/'PASSWORD': '$DATABASE_PASSWORD',/" "/etc/tower/settings.py"
-sudo sed -i "s/'HOST': os.getenv(\"DATABASE_HOST\", None),/'HOST': '$DATABASE_HOST',/" "/etc/tower/settings.py"
-sudo sed -i "s/'PORT': os.getenv(\"DATABASE_PORT\", None),/'PORT': $DATABASE_PORT,/" "/etc/tower/settings.py"
+sudo sed -i "s/'USER': os.getenv(\"DATABASE_USER\", None),/'USER': 'awx',/" "/etc/tower/settings.py"
+sudo sed -i "s/'PASSWORD': os.getenv(\"DATABASE_PASSWORD\", None),/'PASSWORD': '$PASSWORD',/" "/etc/tower/settings.py"
+sudo sed -i "s/'HOST': os.getenv(\"DATABASE_HOST\", None),/'HOST': '$HOSTNAME',/" "/etc/tower/settings.py"
+sudo sed -i "s/'PORT': os.getenv(\"DATABASE_PORT\", None),/'PORT': 5432,/" "/etc/tower/settings.py"
 
 ## On all hosts, generate SSL certificates for NGINX:
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/tower/tower.key -out /etc/tower/tower.crt > /dev/null << EOF
@@ -99,7 +93,7 @@ sudo sed -i "s/id\:\ 0\.0\.0\.0/id\:\ $HOSTNAME/" "/etc/receptor/receptor.conf"
 ## Start the service
 sudo systemctl enable --now ol-automation-manager.service
 
-sudo su - awx -c "awx-manage createsuperuser --username admin --email $ADMIN_EMAIL > /dev/null << EOF
-$ADMIN_PASSWORD
-$ADMIN_PASSWORD
+sudo su - awx -c "awx-manage createsuperuser --username admin --email $EMAIL > /dev/null << EOF
+$PASSWORD
+$PASSWORD
 EOF"
